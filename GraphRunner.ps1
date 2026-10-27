@@ -143,10 +143,10 @@ function Get-GraphTokens{
 
         If($AuthorizationCodeFlow){
             try {
-                # start authorization code flow and obtain tokens for Azure CLI client
-                $copilot_app_tokens = Invoke-AuthorizationCodeFlow
+                # start authorization code flow and obtain tokens for the Copilot app client
+                $copilot_app_tokens = Invoke-AuthorizationCodeFlow -UserAgent $UserAgent
 
-                # exchange Azure CLI FOCI refresh token for Microsoft Office token
+                # exchange the Copilot FOCI refresh token for a Microsoft Office token
                 if ($copilot_app_tokens) {
                     $token_endpoint = "https://login.microsoftonline.com/organizations/oauth2/v2.0/token"
                     $body = @{
@@ -159,11 +159,13 @@ function Get-GraphTokens{
                     if ($ms_office_tokens) {
                         Invoke-ParseTokens -Tokens $ms_office_tokens
                         $global:tokens = $ms_office_tokens
+                        if($ExternalCall){
+                            return $ms_office_tokens
+                        }
                     }
                 }
             } catch {
-                $details = $_.ErrorDetails.Message | ConvertFrom-Json
-                Write-Output $details.error
+                Write-Host -ForegroundColor Red "[-] Authorization code flow failed: $(Get-OAuthErrorMessage -ErrorRecord $_)"
             }
         }
 
@@ -10426,8 +10428,59 @@ function Get-UserAgentDefaults
     $defaults['Invoke-WebRequest:UserAgent'] = $UserAgent
     return $defaults
 }
+function Get-OAuthErrorMessage
+{
+    <#
+    .DESCRIPTION
+        Pull the human-readable error out of a failed token request. The Entra token endpoint returns the real
+        reason (including the AADSTS code) in the JSON error_description field. On PowerShell 7 the response body
+        is in $_.ErrorDetails.Message; on Windows PowerShell 5.1 it has to be read from the response stream.
+        Returns the first line of error_description when present, otherwise the error code or the raw body.
+    #>
+    [cmdletbinding()]
+    Param(
+        [Parameter(Mandatory=$True)]
+        $ErrorRecord
+    )
+    $raw = $null
+    if ($ErrorRecord.ErrorDetails -and -not [string]::IsNullOrEmpty($ErrorRecord.ErrorDetails.Message)) {
+        $raw = $ErrorRecord.ErrorDetails.Message
+    } elseif ($ErrorRecord.Exception.Response -and ($ErrorRecord.Exception.Response | Get-Member -Name GetResponseStream -ErrorAction SilentlyContinue)) {
+        try {
+            $reader = New-Object System.IO.StreamReader($ErrorRecord.Exception.Response.GetResponseStream())
+            $raw = $reader.ReadToEnd()
+            $reader.Close()
+        } catch {}
+    }
+    if ([string]::IsNullOrEmpty($raw)) {
+        return $ErrorRecord.Exception.Message
+    }
+    try {
+        $json = $raw | ConvertFrom-Json
+        if (-not [string]::IsNullOrEmpty($json.error_description)) {
+            return (($json.error_description -split "`r`n")[0]).Trim()
+        } elseif (-not [string]::IsNullOrEmpty($json.error)) {
+            return $json.error
+        }
+    } catch {}
+    return $raw
+}
 
 function Invoke-AuthorizationCodeFlow {
+    [cmdletbinding()]
+    Param(
+        [Parameter(Mandatory=$False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]$Device,
+        [Parameter(Mandatory=$False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]$Browser,
+        [Parameter(Mandatory=$False)]
+        [String]$UserAgent
+    )
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
+
     # initial token will be for Copilot App client
     $client_id = "14638111-3389-403d-b206-a6a71d9f8f16"
     $Scope = "https://graph.microsoft.com//.default offline_access openid profile"
@@ -10472,6 +10525,8 @@ function Invoke-AuthorizationCodeFlow {
         "&prompt=select_account"
     Start-Process $authUrl
 
+    Write-Host "[*] If a browser did not open, or to control the browser User-Agent, open this URL manually:" -ForegroundColor Yellow
+    Write-Host "    $authUrl" -ForegroundColor Cyan
     Write-Host "[*] Obtaining authorization code..." -ForegroundColor Yellow
 
     while($listener.IsListening) {
@@ -10529,13 +10584,9 @@ function Invoke-AuthorizationCodeFlow {
         $tokens = Invoke-RestMethod -Uri $tokenEndpoint -Method Post -Body $body -ContentType "application/x-www-form-urlencoded"
         return $tokens
     } catch {
-        Write-Error "Failed to exchange authorization code: $($_.Exception.Message)"
-        if ($_.Exception.Response) {
-            $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-            $errorBody = $reader.ReadToEnd()
-            Write-Error "Error details: $errorBody"
-        }
-        throw
+        $message = Get-OAuthErrorMessage -ErrorRecord $_
+        Write-Host "[-] Failed to exchange authorization code: $message" -ForegroundColor Red
+        throw $message
     }
 }
 

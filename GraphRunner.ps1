@@ -8418,14 +8418,22 @@ function Invoke-SearchUserAttributes {
             }
 
             $upn = $userAttributesResponse.UserPrincipalName
-            # Search through attributes (excluding @odata.context)
-            $propertiesToSearch = $userAttributesResponse.PSObject.Properties | Where-Object { $_.Name -ne "@odata.context" }
+            # Search through attributes, excluding @odata.context and structural/metadata fields. Those
+            # (password policy, timestamps, object IDs) are not where a secret is stashed, and they produce
+            # false positives - e.g. the term "password" always matches passwordPolicies on every user.
+            $skipAttributes = @(
+                'passwordPolicies','passwordProfile','lastPasswordChangeDateTime','createdDateTime',
+                'employeeHireDate','externalUserStateChangeDateTime','onPremisesLastSyncDateTime',
+                'signInSessionsValidFromDateTime','id','onPremisesImmutableId','onPremisesSecurityIdentifier',
+                'onPremisesProvisioningErrors'
+            )
+            $propertiesToSearch = $userAttributesResponse.PSObject.Properties | Where-Object { $_.Name -ne "@odata.context" -and $skipAttributes -notcontains $_.Name }
             foreach ($property in $propertiesToSearch) {
                 $propertyName = $property.Name
                 $propertyValue = $property.Value
 
                 if ($propertyValue -is [string] -and $propertyValue -like "*$searchTerm*") {
-                    Write-Host -ForegroundColor green "[*] Found a match! User: $upn in attritube: $propertyName : $propertyValue"
+                    Write-Host -ForegroundColor green "[*] Found a match! User: $upn in attribute: $propertyName : $propertyValue"
                 }
             }
         }

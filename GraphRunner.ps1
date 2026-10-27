@@ -9941,6 +9941,287 @@ function Invoke-CreateCalendarEvent {
     }
 }
 
+function Invoke-SoftwareRecon {
+    <#
+    .SYNOPSIS
+        Enumerates software installed on Intune-managed devices via the Microsoft Graph API.
+        Author: Jason Haddix (@jhaddix), reworked for current GraphRunner
+        License: MIT
+        Required Dependencies: None
+        Optional Dependencies: None
+
+    .DESCRIPTION
+
+        Lists the detected applications on each device managed by Intune. Returns the device name, owner,
+        operating system, and each detected app name and version. Requires a token with device management read
+        permissions such as DeviceManagementManagedDevices.Read.All.
+
+    .PARAMETER Tokens
+
+        Pass the $tokens global variable after authenticating to this parameter.
+
+    .PARAMETER OutFile
+
+        File to write the results to as CSV.
+
+    .EXAMPLE
+
+        C:\PS> Invoke-SoftwareRecon -Tokens $tokens -OutFile software.csv
+        -----------
+        This will enumerate software on all Intune-managed devices and write the results to software.csv.
+    #>
+    param(
+        [Parameter(Position = 0, Mandatory = $false)]
+        [object[]]
+        $Tokens = "",
+        [Parameter(Position = 1, Mandatory = $false)]
+        [string]
+        $OutFile = "",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
+    )
+
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
+    if($Tokens){
+        Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
+    }
+    else{
+        Write-Host -ForegroundColor yellow "[*] First, you need to login."
+        Write-Host -ForegroundColor yellow "[*] If you already have tokens you can use the -Tokens parameter to pass them to this function."
+        while($auth -notlike "Yes"){
+            Write-Host -ForegroundColor cyan "[*] Do you want to authenticate now (yes/no)?"
+            $answer = Read-Host
+            $answer = $answer.ToLower()
+            if ($answer -eq "yes" -or $answer -eq "y") {
+                Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
+                $auth = "Yes"
+            } elseif ($answer -eq "no" -or $answer -eq "n") {
+                Write-Host -ForegroundColor Yellow "[*] Quitting..."
+                return
+            } else {
+                Write-Host -ForegroundColor red "Invalid input. Please enter Yes or No."
+            }
+        }
+    }
+    $access_token = $tokens.access_token
+    $headers = @{ "Authorization" = "Bearer $access_token" }
+
+    # Gather all managed devices
+    $devices = @()
+    $devicesEndpoint = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices?`$top=100"
+    do {
+        try {
+            $request = Invoke-WebRequest -UseBasicParsing -Method GET -Uri $devicesEndpoint -Headers $headers
+        } catch {
+            if ($_.Exception.Response.StatusCode.value__ -eq 429) {
+                Write-Host -ForegroundColor red "[*] Being throttled... sleeping 5 seconds"
+                Start-Sleep -Seconds 5
+                continue
+            }
+            if ($_.Exception.Response.StatusCode.value__ -eq 403) {
+                Write-Host -ForegroundColor Red "[*] Access denied listing managed devices. Your token likely lacks DeviceManagementManagedDevices.Read.All."
+            } else {
+                Write-Host -ForegroundColor red "[*] Error gathering managed devices: $($_.Exception.Message)"
+            }
+            return
+        }
+        $out = $request.Content | ConvertFrom-Json
+        $devices += $out.value
+        if ($out.'@odata.nextLink') { $devicesEndpoint = $out.'@odata.nextLink' } else { break }
+    } while ($true)
+
+    if (!$devices) {
+        Write-Host -ForegroundColor Yellow "[*] No Intune-managed devices were returned."
+        return
+    }
+    Write-Host -ForegroundColor Yellow ("[*] Found " + $devices.Count + " managed device(s). Gathering detected apps...")
+
+    $resultsList = @()
+    foreach ($dev in $devices) {
+        $appsEndpoint = "https://graph.microsoft.com/v1.0/deviceManagement/managedDevices/$($dev.id)/detectedApps?`$top=100"
+        do {
+            try {
+                $appsRequest = Invoke-WebRequest -UseBasicParsing -Method GET -Uri $appsEndpoint -Headers $headers
+            } catch {
+                if ($_.Exception.Response.StatusCode.value__ -eq 429) {
+                    Write-Host -ForegroundColor red "[*] Being throttled... sleeping 5 seconds"
+                    Start-Sleep -Seconds 5
+                    continue
+                }
+                Write-Host -ForegroundColor red "[*] Error gathering apps for $($dev.deviceName): $($_.Exception.Message)"
+                break
+            }
+            $appsOut = $appsRequest.Content | ConvertFrom-Json
+            foreach ($app in $appsOut.value) {
+                $resultsList += [PSCustomObject]@{
+                    DeviceName         = $dev.deviceName
+                    UserPrincipalName  = $dev.userPrincipalName
+                    OperatingSystem    = ("{0} {1}" -f $dev.operatingSystem, $dev.osVersion).Trim()
+                    AppName            = $app.displayName
+                    AppVersion         = $app.version
+                }
+            }
+            if ($appsOut.'@odata.nextLink') { $appsEndpoint = $appsOut.'@odata.nextLink' } else { break }
+        } while ($true)
+    }
+
+    Write-Host -ForegroundColor Green ("[*] Collected " + $resultsList.Count + " installed app record(s).")
+    if ($OutFile) {
+        $resultsList | Export-Csv -Path $OutFile -NoTypeInformation
+        Write-Host -ForegroundColor Green "[*] Results written to $OutFile"
+    } else {
+        $resultsList | Format-Table DeviceName, UserPrincipalName, OperatingSystem, AppName, AppVersion -AutoSize
+    }
+}
+function Invoke-FetchCalendarData {
+    <#
+    .SYNOPSIS
+        Reads calendar events for a user via the Microsoft Graph API.
+        Author: Jason Haddix (@jhaddix), reworked for current GraphRunner
+        License: MIT
+        Required Dependencies: None
+        Optional Dependencies: None
+
+    .DESCRIPTION
+
+        Retrieves calendar events (subject, organizer, start, end, location, and preview) for the authenticated
+        user or a specified target. Reading another user's calendar requires calendar read permissions such as
+        Calendars.Read or Calendars.Read.Shared and access to that mailbox.
+
+    .PARAMETER Tokens
+
+        Pass the $tokens global variable after authenticating to this parameter.
+
+    .PARAMETER userid
+
+        Email address of the target mailbox. Omit to read the authenticated user's own calendar.
+
+    .PARAMETER OutFile
+
+        File to write the results to as CSV.
+
+    .EXAMPLE
+
+        C:\PS> Invoke-FetchCalendarData -Tokens $tokens -userid deckard@tyrellcorporation.io -OutFile calendar.csv
+        -----------
+        This will read the target user's calendar events and write them to calendar.csv.
+    #>
+    param(
+        [Parameter(Position = 0, Mandatory = $false)]
+        [object[]]
+        $Tokens = "",
+        [Parameter(Position = 1, Mandatory = $false)]
+        [string]
+        $userid = "",
+        [Parameter(Position = 2, Mandatory = $false)]
+        [string]
+        $OutFile = "",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
+    )
+
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
+    if($Tokens){
+        Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
+    }
+    else{
+        Write-Host -ForegroundColor yellow "[*] First, you need to login."
+        Write-Host -ForegroundColor yellow "[*] If you already have tokens you can use the -Tokens parameter to pass them to this function."
+        while($auth -notlike "Yes"){
+            Write-Host -ForegroundColor cyan "[*] Do you want to authenticate now (yes/no)?"
+            $answer = Read-Host
+            $answer = $answer.ToLower()
+            if ($answer -eq "yes" -or $answer -eq "y") {
+                Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
+                $auth = "Yes"
+            } elseif ($answer -eq "no" -or $answer -eq "n") {
+                Write-Host -ForegroundColor Yellow "[*] Quitting..."
+                return
+            } else {
+                Write-Host -ForegroundColor red "Invalid input. Please enter Yes or No."
+            }
+        }
+    }
+    $access_token = $tokens.access_token
+    $headers = @{ "Authorization" = "Bearer $access_token" }
+
+    if ($userid) {
+        $target = $userid
+        $eventsEndpoint = "https://graph.microsoft.com/v1.0/users/$userid/events?`$top=50"
+    } else {
+        $target = "me"
+        $eventsEndpoint = "https://graph.microsoft.com/v1.0/me/events?`$top=50"
+    }
+
+    $resultsList = @()
+    do {
+        try {
+            $request = Invoke-WebRequest -UseBasicParsing -Method GET -Uri $eventsEndpoint -Headers $headers
+        } catch {
+            if ($_.Exception.Response.StatusCode.value__ -eq 429) {
+                Write-Host -ForegroundColor red "[*] Being throttled... sleeping 5 seconds"
+                Start-Sleep -Seconds 5
+                continue
+            }
+            if ($_.Exception.Response.StatusCode.value__ -eq 403) {
+                Write-Host -ForegroundColor Red "[*] Access denied reading calendar for '$target'."
+                Write-Host -ForegroundColor Yellow "[*] Your token may be missing calendar read scopes (Calendars.Read / Calendars.Read.Shared) or you may not have access to this mailbox."
+            } else {
+                Write-Host -ForegroundColor red "[*] Error reading calendar: $($_.Exception.Message)"
+            }
+            return
+        }
+        $out = $request.Content | ConvertFrom-Json
+        foreach ($ev in $out.value) {
+            $resultsList += [PSCustomObject]@{
+                Subject   = $ev.subject
+                Organizer = $ev.organizer.emailAddress.address
+                Start     = $ev.start.dateTime
+                End       = $ev.end.dateTime
+                Location  = $ev.location.displayName
+                Preview   = $ev.bodyPreview
+            }
+        }
+        if ($out.'@odata.nextLink') { $eventsEndpoint = $out.'@odata.nextLink' } else { break }
+    } while ($true)
+
+    Write-Host -ForegroundColor Green ("[*] Retrieved " + $resultsList.Count + " calendar event(s) for $target.")
+    if ($OutFile) {
+        $resultsList | Export-Csv -Path $OutFile -NoTypeInformation
+        Write-Host -ForegroundColor Green "[*] Results written to $OutFile"
+    } else {
+        $resultsList | Format-Table Subject, Organizer, Start, End, Location -AutoSize
+    }
+}
+
 
 function Invoke-GraphRunner{
     <#
@@ -10739,6 +11020,8 @@ function List-GraphRunnerModules {
     Write-Host -ForegroundColor Green "Get-SharePointSiteURLs`t`t-`t Gets a list of SharePoint site URLs visible to the current user"
     Write-Host -ForegroundColor Green "Invoke-GraphOpenInboxFinder`t-`t Checks each user's inbox in a list to see if they are readable"
     Write-Host -ForegroundColor Green "Find-PermissiveCalendars`t-`t Finds calendars shared more permissively than free/busy visibility"
+    Write-Host -ForegroundColor Green "Invoke-FetchCalendarData`t-`t Reads calendar events for the current user or a target mailbox"
+    Write-Host -ForegroundColor Green "Invoke-SoftwareRecon`t`t-`t Lists software installed on Intune-managed devices"
     Write-Host -ForegroundColor Green "Check-FrontDoorWAF`t`t-`t Audits Front Door WAF policies for RemoteAddr matching issues"
     Write-Host -ForegroundColor Green "Get-TenantID`t`t`t-`t Retrieves the tenant GUID from the domain name"
 

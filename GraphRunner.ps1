@@ -48,7 +48,15 @@ function Get-GraphTokens{
 
         Provide a Browser to spoof.
 
+    .PARAMETER UserAgent
 
+        Provide a full custom User-Agent string to send on every request, overriding -Device/-Browser. Useful for
+        bypassing device-platform Conditional Access policies with an out-of-the-ordinary agent.
+
+    .PARAMETER AuthorizationCodeFlow
+
+        Authenticate with an interactive OAuth2 authorization code flow (opens a browser and a local listener)
+        instead of device code auth.
 
     .EXAMPLE
 
@@ -56,6 +64,13 @@ function Get-GraphTokens{
         Description
         -----------
         This command will initiate a device code auth where you can authenticate the terminal from an already authenticated browser session.
+
+    .EXAMPLE
+
+        C:\PS> Get-GraphTokens -AuthorizationCodeFlow -Device Windows -Browser Edge
+        Description
+        -----------
+        This command will initiate an authorization code flow and spoof a Windows/Edge User-Agent on the token request.
      #>
     [CmdletBinding()]
     param(
@@ -10733,7 +10748,9 @@ function List-GraphRunnerModules {
     Write-Host -ForegroundColor Green "Invoke-SecurityGroupCloner`t-`t Clones a security group while using an identical name and member list but can inject another user as well"
     Write-Host -ForegroundColor Green "Invoke-InviteGuest`t`t-`t Invites a guest user to the tenant"
     Write-Host -ForegroundColor Green "Invoke-AddGroupMember`t`t-`t Adds a member to a group"
-    Write-Host -ForegroundColor Green "Invoke-CreateInboxForwardingRule -`t Creates an inbox forwarding rule that forwards all emails matching a specified term to an email address." 
+    Write-Host -ForegroundColor Green "Invoke-AddUserToAllUpdatableGroups -`t Adds a user to every group ID listed in a file"
+    Write-Host -ForegroundColor Green "Invoke-RemoveUserFromAllUpdatableGroups - Removes a user from every group ID listed in a file"
+    Write-Host -ForegroundColor Green "Invoke-CreateInboxForwardingRule -`t Creates an inbox forwarding rule that forwards all emails matching a specified term to an email address."
 
     Write-Host -ForegroundColor Green "----------------------- Pillage Modules -----------------------"
     Write-Host -ForegroundColor Green "`tMODULE`t`t`t-`t DESCRIPTION"

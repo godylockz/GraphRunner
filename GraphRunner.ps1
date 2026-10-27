@@ -76,25 +76,14 @@ function Get-GraphTokens{
     [Parameter(Position = 6,Mandatory=$False)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
     [String]$Browser,
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent,
     [Parameter(Position = 7,Mandatory=$False)]
     [switch]$AuthorizationCodeFlow
     )
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($UserPasswordAuth){
         Write-Host -ForegroundColor Yellow "[*] Initiating the User/Password authentication flow"
         $username = Read-Host -Prompt "Enter username"
@@ -418,23 +407,15 @@ function Invoke-RefreshGraphTokens {
         [ValidateSet('Android', 'IE', 'Chrome', 'Firefox', 'Edge', 'Safari')]
         [String]
         $Browser,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent,
         [switch]
         $AutoRefresh
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        } else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    } else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        } else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if (!$RefreshToken) {
         if (!$tokens) {
@@ -551,9 +532,7 @@ function Invoke-InjectOAuthApp{
 
     [Parameter(Position = 3, Mandatory = $False)]
     [object[]]
-    $Tokens
-
-,
+    $Tokens,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -564,25 +543,14 @@ function Invoke-InjectOAuthApp{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
   )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -596,7 +564,7 @@ function Invoke-InjectOAuthApp{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -802,24 +770,13 @@ function Invoke-RefreshToSharePointToken {
     [String]$Device,
     [Parameter(Mandatory=$False)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
-    [String]$Browser
+    [String]$Browser,
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent
     )
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     $Headers=@{}
     $Headers["User-Agent"] = $UserAgent
     $Resource = "https://$($domain)/"
@@ -889,24 +846,13 @@ function Invoke-ImmersiveFileReader{
         [String]$Device,
         [Parameter(Mandatory=$False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
-        [String]$Browser
+        [String]$Browser,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
-        if ($Device) {
-            if ($Browser) {
-                $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-            }
-            else {
-                $UserAgent = Invoke-ForgeUserAgent -Device $Device
-            }
-        }
-        else {
-           if ($Browser) {
-                $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-           }
-           else {
-                $UserAgent = Invoke-ForgeUserAgent
-           }
-        }
+        $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+        $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         $Headers=@{}
         $Headers["User-Agent"] = $UserAgent
     if($Tokens){
@@ -982,9 +928,7 @@ function Invoke-DeleteOAuthApp{
         $Tokens = "",
         [Parameter(Position = 0, Mandatory = $True)]
         [string]
-        $ObjectID = ""
-
-,
+        $ObjectID = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -995,25 +939,14 @@ function Invoke-DeleteOAuthApp{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     $accessToken = $tokens.access_token
     $deleteUrl = "https://graph.microsoft.com/v1.0/applications/$ObjectID"
     $headers = @{
@@ -1069,9 +1002,7 @@ Function Invoke-GraphOpenInboxFinder{
     $Tokens = "",
     [Parameter(Position = 0, Mandatory = $true)]
     [string]
-    $userlist = ""
-
-,
+    $userlist = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -1082,25 +1013,14 @@ Function Invoke-GraphOpenInboxFinder{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($tokens){
         $access_token = $tokens.access_token
@@ -1188,9 +1108,7 @@ Function Find-PermissiveCalendars{
     $UserList = "",
     [Parameter(Position = 2, Mandatory = $false)]
     [string]
-    $OutFile = ""
-
-,
+    $OutFile = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -1201,25 +1119,14 @@ Function Find-PermissiveCalendars{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($tokens){
         $access_token = $tokens.access_token
@@ -1749,9 +1656,7 @@ Function Get-Inbox{
     $TotalMessages = "25",
     [Parameter(Position = 3, Mandatory = $false)]
     [string]
-    $OutFile = ""
-
-,
+    $OutFile = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -1762,25 +1667,14 @@ Function Get-Inbox{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($Tokens){
             Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -1794,7 +1688,7 @@ Function Get-Inbox{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -1921,9 +1815,7 @@ Function Invoke-CreateInboxForwardingRule {
         [switch]
         $GraphRun,
         [switch]
-        $PageResults
-
-,
+        $PageResults,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -1934,32 +1826,21 @@ Function Invoke-CreateInboxForwardingRule {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     # Requires a graph token scoped with MailboxSettings.ReadWrite, so we need to authenticate with the Microsoft Teams client (1fec8e78-bce4-4aaf-ab1b-5451cc387264)
     # If we have a refresh token, we can leverage FOCI to refresh an access token with the correct scope 
     if ($Tokens) {
         if (!$GraphRun) {
             Write-Host -ForegroundColor yellow "[*] Refreshing into Teams client ID scoped token."
-            $reftokens = Invoke-RefreshGraphTokens -RefreshToken $refreshToken -AutoRefresh -tenantid $global:tenantid -Resource $Resource -Client "Custom" -ClientID "1fec8e78-bce4-4aaf-ab1b-5451cc387264" -Browser $Browser -Device $Device
+            $reftokens = Invoke-RefreshGraphTokens -RefreshToken $refreshToken -AutoRefresh -tenantid $global:tenantid -Resource $Resource -Client "Custom" -ClientID "1fec8e78-bce4-4aaf-ab1b-5451cc387264" -Browser $Browser -UserAgent $UserAgent -Device $Device
         }
     }
     else {
@@ -2064,9 +1945,7 @@ function Get-TeamsApps{
     Param (
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
-        $Tokens
-
-,
+        $Tokens,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -2077,25 +1956,14 @@ function Get-TeamsApps{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2109,7 +1977,7 @@ function Get-TeamsApps{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2182,9 +2050,7 @@ function Get-TeamsChannels{
     Param (
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
-        $Tokens
-
-,
+        $Tokens,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -2195,25 +2061,14 @@ function Get-TeamsChannels{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2227,7 +2082,7 @@ function Get-TeamsChannels{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2307,9 +2162,7 @@ function Get-ChannelUsersEnum{
         $Channel = "",
         [Parameter(Position = 2, Mandatory = $False)]
         [string]
-        $Teams = ""
-
-,
+        $Teams = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -2320,25 +2173,14 @@ function Get-ChannelUsersEnum{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2352,7 +2194,7 @@ function Get-ChannelUsersEnum{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2376,7 +2218,7 @@ function Get-ChannelUsersEnum{
         $teamsheaders = @{
             Authorization  = "Bearer $access_token"
             "Content-Type" = "application/json"
-            "User-Agent"   = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+            "User-Agent"   = $UserAgent
         }
         $teamsResponse = Invoke-RestMethod -Method Get -Uri "https://graph.microsoft.com/v1.0/me/joinedTeams" -Headers $teamsheaders
         $channelFound = $false
@@ -2469,9 +2311,7 @@ function Get-ChannelEmail{
         $Channel = "",
         [Parameter(Position = 2, Mandatory = $False)]
         [string]
-        $Teams = ""
-
-,
+        $Teams = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -2482,25 +2322,14 @@ function Get-ChannelEmail{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2514,7 +2343,7 @@ function Get-ChannelEmail{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2563,7 +2392,7 @@ function Get-ChannelEmail{
             "Sec-Ch-Ua-Mobile" = "?0"
             "Authorization"    = "Bearer $token2"
             "Sstoken"          = "$SStoken"
-            "User-Agent"       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+            "User-Agent"       = $UserAgent
         }
 
         $response3 = Invoke-WebRequest -Uri "https://outlook.office.com/connectors/Manage/AuthorizeUsingToken?client=SkypeSpaces" -Method Get -SessionVariable WebSession -headers $headers
@@ -2611,7 +2440,7 @@ function Get-ChannelEmail{
         }
                 $headers2 = @{
                     "Host"       = "outlook.office.com"
-                    "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                    "User-Agent" = $UserAgent
                 }
                 ### Set the cookie Value you needs to be the team Channel ID
                 $Cookie = New-Object System.Net.Cookie
@@ -2625,7 +2454,7 @@ function Get-ChannelEmail{
                 ###This is where we get a SPECIFIC SkypeSpaceToken that allows us Query the configuration API
                 $headers3 = @{
                     "Authorization" = "Bearer $token3"
-                    "User-Agent"    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                    "User-Agent"    = $UserAgent
                     "Origin"        = "https://teams.microsoft.com"
 
                 }
@@ -2638,7 +2467,7 @@ function Get-ChannelEmail{
                 Write-Host "Checking Channel for Email Address"
                     $Channelheader = @{
                         "Authorization" = "Bearer $token3"
-                        "User-Agent"    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                        "User-Agent"    = $UserAgent
                         "Origin"        = "https://teams.microsoft.com"
                         "X-Skypetoken"  = "$skypeToken"
                     }
@@ -2657,7 +2486,7 @@ function Get-ChannelEmail{
                         $PostChannelheader = @{
                             "Authorization" = "Bearer $token3"
                             "X-Skypetoken"  = "$skypeToken"
-                            "User-Agent"    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                            "User-Agent"    = $UserAgent
                             "Content-Type" = "application/json;charset=UTF-8"
                         }
                         $body = "{`"allowedSenderType`":`"anyone`",`"allowedDomains`":null}"
@@ -2679,7 +2508,7 @@ function Get-ChannelEmail{
                     Write-Host -ForegroundColor Yellow "Changing Email Address Permissions to Anyone"
                     $SetChannelheader = @{
                         "Authorization" = "Bearer $token3"
-                        "User-Agent"    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                        "User-Agent"    = $UserAgent
                         "Origin"        = "https://teams.microsoft.com"
                         "X-Skypetoken"  = "$skypeToken"
                     }
@@ -2717,9 +2546,7 @@ function Find-ChannelEmails{
     Param (
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
-        $Tokens
-
-,
+        $Tokens,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -2730,25 +2557,14 @@ function Find-ChannelEmails{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2762,7 +2578,7 @@ function Find-ChannelEmails{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2784,7 +2600,7 @@ function Find-ChannelEmails{
         $teamsheaders = @{
             Authorization  = "Bearer $access_token"
             "Content-Type" = "application/json"
-            "User-Agent"   = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+            "User-Agent"   = $UserAgent
         }
         $teamsResponse = Invoke-RestMethod -Method Get -Uri "https://graph.microsoft.com/v1.0/me/joinedTeams" -Headers $teamsheaders
         foreach ($team in $teamsResponse.value) {
@@ -2836,9 +2652,7 @@ function Get-Webhooks{
     Param (
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
-        $Tokens
-
-,
+        $Tokens,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -2849,25 +2663,14 @@ function Get-Webhooks{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
         )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2881,7 +2684,7 @@ function Get-Webhooks{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2942,7 +2745,7 @@ function Get-Webhooks{
                 "Sec-Ch-Ua-Mobile" = "?0"
                 "Authorization"    = "Bearer $token2"
                 "Sstoken"          = "$SStoken"
-                "User-Agent"       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                "User-Agent"       = $UserAgent
             }
 
             $response3 = Invoke-WebRequest -Uri "https://outlook.office.com/connectors/Manage/AuthorizeUsingToken?client=SkypeSpaces" -Method Get -SessionVariable WebSession -headers $headers
@@ -2968,7 +2771,7 @@ function Get-Webhooks{
 
                     $headers2 = @{
                         "Host"       = "outlook.office.com"
-                        "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                        "User-Agent" = $UserAgent
                     }
 
                     ### Set the cookie Value you needs to be the team Channel ID
@@ -2984,7 +2787,7 @@ function Get-Webhooks{
                     ### This is where we get a SPECIFIC SkypeSpaceToken that allows us Query the configuration API
                     $headers3 = @{
                         "Authorization" = "Bearer $token3"
-                        "User-Agent"    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                        "User-Agent"    = $UserAgent
                         "Origin"        = "https://teams.microsoft.com"
 
                     }
@@ -3015,7 +2818,7 @@ function Get-Webhooks{
 
                     $headers4 = @{
                         "Host"       = "outlook.office.com"
-                        "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                        "User-Agent" = $UserAgent
                     }
 
                     ### Need to get the MailBox ID client
@@ -3132,9 +2935,7 @@ function Create-Webhook{
             $Name = "",
             [Parameter(Position = 4, Mandatory = $True)]
             [ValidateSet("IncomingWebhook","Jira","Jenkins","AzureDevOps")]
-            [String]$ConnectorType
-
-,
+            [String]$ConnectorType,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -3145,25 +2946,14 @@ function Create-Webhook{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
             )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
             if(!$Tokens){
                 if ($global:tokens){
                     $tokens = $global:tokens
@@ -3177,7 +2967,7 @@ function Create-Webhook{
                         $answer = $answer.ToLower()
                         if ($answer -eq "yes" -or $answer -eq "y") {
                             Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                            $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                            $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                             $auth = "Yes"
                         } elseif ($answer -eq "no" -or $answer -eq "n") {
                             Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -3259,7 +3049,7 @@ function Create-Webhook{
             "Sec-Ch-Ua-Mobile" = "?0"
             "Authorization"    = "Bearer $token2"
             "Sstoken"          = "$SStoken"
-            "User-Agent"       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+            "User-Agent"       = $UserAgent
         }
 
         $response3 = Invoke-WebRequest -Uri "https://outlook.office.com/connectors/Manage/AuthorizeUsingToken?client=SkypeSpaces" -Method Get -SessionVariable WebSession -headers $headers
@@ -3312,7 +3102,7 @@ function Create-Webhook{
 
                         $headers2 = @{
                             "Host"       = "outlook.office.com"
-                            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                            "User-Agent" = $UserAgent
                         }
                         ### Set the cookie Value you needs to be the team Channel ID
                         $Cookie = New-Object System.Net.Cookie
@@ -3326,7 +3116,7 @@ function Create-Webhook{
                         ### This is where we get a SkypeSpaceToken that allows us to query the configuration API
                         $headers3 = @{
                             "Authorization" = "Bearer $token3"
-                            "User-Agent"    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                            "User-Agent"    = $UserAgent
                             "Origin"        = "https://teams.microsoft.com"
 
                         }
@@ -3357,7 +3147,7 @@ function Create-Webhook{
 
                         $headers4 = @{
                             "Host"       = "outlook.office.com"
-                            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                            "User-Agent" = $UserAgent
                         }
                         $WHresponse = Invoke-WebRequest -Uri "https://outlook.office.com/connectors/$connectorurl/Manage/New?MailboxAddress=$teamId%40$tenantid&client=SkypeSpaces&SSThread=$channelId&HostName=teams.microsoft.com&culture=en-us&ssApiHost=amer.ng.msg.teams.microsoft.com&iframe=true&SSTheme=default" -Method Get -WebSession $WebSession -headers $headers4
                         $pattern = '<input\s+name="__RequestVerificationToken"\s+type="hidden"\s+value="([^"]+)"'
@@ -3447,7 +3237,7 @@ function Create-Webhook{
 
                         $Creationheaders = @{
                             "Host"       = "outlook.office.com"
-                            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6045.123 Safari/537.36"
+                            "User-Agent" = $UserAgent
                         }
                         $LF = "`r`n";
                         $boundary = "----WebKitFormBoundary$randomString"
@@ -3604,9 +3394,7 @@ function Get-TeamsChat{
     param(
     [Parameter(Position = 0, Mandatory = $false)]
     [object[]]
-    $Tokens = ""
-
-,
+    $Tokens = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -3617,25 +3405,14 @@ function Get-TeamsChat{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($Tokens){
             Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -3927,6 +3704,9 @@ Function Get-AzureADUsers{
     [Parameter(Mandatory=$false)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
     [String]$Browser = "Edge",
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent,
     [Parameter(Mandatory=$False)]
     [String]$ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
     [Parameter(Mandatory = $true)]
@@ -3936,22 +3716,8 @@ Function Get-AzureADUsers{
     $GraphRun
     )
     $access_token = $tokens.access_token
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if(!$GraphRun){
     Write-Host "[*] Gathering the users from the tenant."
     }
@@ -4636,25 +4402,17 @@ Function Invoke-DumpCAPS{
         [Parameter(Mandatory=$False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]$Browser,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent,
         [Parameter(Mandatory=$False)]
         [switch]$FullJsonOut,
         [Parameter(Mandatory=$False)]
         [string]$OutFile = ""
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        } else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    } else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        } else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     $modernTokenData = $null
     $legacyTokenData = $null
@@ -5639,9 +5397,7 @@ Function Invoke-DumpApps{
         [Parameter(Mandatory = $False)]
         [string]$OutFile = "",
         [Parameter(Mandatory = $False)]
-        [switch]$SkipMicrosoftOwnedSPs
-
-,
+        [switch]$SkipMicrosoftOwnedSPs,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -5652,25 +5408,14 @@ Function Invoke-DumpApps{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         if(!$GraphRun){
@@ -5687,7 +5432,7 @@ Function Invoke-DumpApps{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -5920,7 +5665,10 @@ function Get-SecurityGroups{
         [String] $Device = "Windows",
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android', 'IE', 'Chrome', 'Firefox', 'Edge', 'Safari')]
-        [String] $Browser = "Edge", # Default value is "Edge"
+        [String] $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent, # Default value is "Edge"
         [Parameter(Mandatory = $False)]
         [switch] $AutoRefresh,
         [Parameter(Mandatory = $False)]
@@ -5931,22 +5679,8 @@ function Get-SecurityGroups{
         $RefreshInterval = (60 * 10) # 10 minutes
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if ($SecurityOnly -and $M365Only) {
         Write-Host -ForegroundColor Red "[*] Please use either -SecurityOnly or -M365Only, not both at the same time."
@@ -5967,7 +5701,7 @@ function Get-SecurityGroups{
             $answer = $answer.ToLower()
             if ($answer -eq "yes" -or $answer -eq "y") {
                 Write-Host -ForegroundColor Yellow "[*] Running Get-GraphTokens now..."
-                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                 $auth = "Yes"
             } elseif ($answer -eq "no" -or $answer -eq "n") {
                 Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6020,7 +5754,7 @@ function Get-SecurityGroups{
         foreach ($group in $groups) {
             if ((Get-Date) - $startTime -ge $refresh_interval) {
                 Write-Host -ForegroundColor Yellow "[*] Pausing script for token refresh..."
-                $reftokens = Invoke-RefreshGraphTokens -RefreshToken $refreshToken -AutoRefresh -tenantid $global:tenantid -Resource $Resource -Client $Client -ClientID $ClientID -Browser $Browser -Device $Device
+                $reftokens = Invoke-RefreshGraphTokens -RefreshToken $refreshToken -AutoRefresh -tenantid $global:tenantid -Resource $Resource -Client $Client -ClientID $ClientID -Browser $Browser -UserAgent $UserAgent -Device $Device
                 $accessToken = $reftokens.access_token
                 [string]$refreshToken = $reftokens.refresh_token
                 $headers = @{
@@ -6112,9 +5846,7 @@ function Get-DirectoryRoles{
         [Parameter(Mandatory = $False)]
         [string] $OutputFile = "directory_roles.csv",
         [Parameter(Mandatory = $False)]
-        [switch] $GraphRun
-
-,
+        [switch] $GraphRun,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -6125,25 +5857,14 @@ function Get-DirectoryRoles{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if ($Tokens) {
         if (!$GraphRun) {
@@ -6158,7 +5879,7 @@ function Get-DirectoryRoles{
             $answer = $answer.ToLower()
             if ($answer -eq "yes" -or $answer -eq "y") {
                 Write-Host -ForegroundColor Yellow "[*] Running Get-GraphTokens now..."
-                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                 $auth = "Yes"
             } elseif ($answer -eq "no" -or $answer -eq "n") {
                 Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6346,9 +6067,7 @@ function Invoke-DeleteGroup {
         [string]
         $groupId,
         [object[]]
-        $Tokens = ""
-
-,
+        $Tokens = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -6359,25 +6078,14 @@ function Invoke-DeleteGroup {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6392,7 +6100,7 @@ function Invoke-DeleteGroup {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6445,9 +6153,7 @@ function Invoke-SecurityGroupCloner{
     Param(
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
-        $Tokens = ""
-
-,
+        $Tokens = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -6458,25 +6164,14 @@ function Invoke-SecurityGroupCloner{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6491,7 +6186,7 @@ function Invoke-SecurityGroupCloner{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6634,7 +6329,10 @@ function Get-UpdatableGroups{
         [Parameter(Mandatory=$False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge",  # Set the default value to "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent,  # Set the default value to "Edge"
         [Parameter(Mandatory = $False)]
         [string]
         $OutputFile = "Updatable_groups.csv",  # Set the default value to "Updatable_groups.csv"
@@ -6696,7 +6394,7 @@ function Get-UpdatableGroups{
 
                     if ((Get-Date) - $startTime -ge $refresh_interval) {
                         Write-Host -ForegroundColor Yellow "[*] Pausing script for token refresh..."
-                        $reftokens = Invoke-RefreshGraphTokens -RefreshToken $refreshToken -AutoRefresh -tenantid $global:tenantid -Resource $Resource -Client $Client -ClientID $ClientID -Browser $Browser -Device $Device
+                        $reftokens = Invoke-RefreshGraphTokens -RefreshToken $refreshToken -AutoRefresh -tenantid $global:tenantid -Resource $Resource -Client $Client -ClientID $ClientID -Browser $Browser -UserAgent $UserAgent -Device $Device
                         $accesstoken = $reftokens.access_token
                         $refreshToken = $reftokens.refresh_token
                         $headers = @{
@@ -6861,25 +6559,14 @@ function Get-DynamicGroups{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6894,7 +6581,7 @@ function Get-DynamicGroups{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7025,9 +6712,7 @@ function Invoke-AddGroupMember {
         [string]
         $userId,
         [object[]]
-        $Tokens = ""
-
-,
+        $Tokens = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -7038,25 +6723,14 @@ function Invoke-AddGroupMember {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -7071,7 +6745,7 @@ function Invoke-AddGroupMember {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7088,7 +6762,7 @@ function Invoke-AddGroupMember {
 
     $headers = @{
         "Authorization" = "Bearer $accessToken"
-        "User-Agent" = "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.3031"
+        "User-Agent" = $UserAgent
         "Content-Type" = "application/json"
     }
 
@@ -7210,9 +6884,7 @@ function Invoke-RemoveGroupMember {
         [string]
         $userId,
         [object[]]
-        $Tokens = ""
-
-,
+        $Tokens = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -7223,25 +6895,14 @@ function Invoke-RemoveGroupMember {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -7256,7 +6917,7 @@ function Invoke-RemoveGroupMember {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7273,7 +6934,7 @@ function Invoke-RemoveGroupMember {
 
     $headers = @{
         "Authorization" = "Bearer $accessToken"
-        "User-Agent" = "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.19041.3031"
+        "User-Agent" = $UserAgent
         "Content-Type" = "application/json"
     }
 
@@ -7382,9 +7043,7 @@ function Get-EntraIDGroupInfo {
         [object[]]$Tokens,         # Your Azure access token
         [string]$GroupList,    # File path to a text file with group names and guids exported from Get-UpdatableGroups
         [string]$GroupName,     # Specific group name to lookup
-        [string]$GroupGUID      # Specific group guid to lookup
-
-,
+        [string]$GroupGUID, # Specific group guid to lookup
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -7395,25 +7054,14 @@ function Get-EntraIDGroupInfo {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -7428,7 +7076,7 @@ function Get-EntraIDGroupInfo {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7613,10 +7261,7 @@ function Invoke-InviteGuest{
 
     [Parameter(Position = 5, Mandatory = $False)]
     [object[]]
-    $Tokens = ""
-
-
-,
+    $Tokens = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -7627,25 +7272,14 @@ function Invoke-InviteGuest{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -7659,7 +7293,7 @@ function Invoke-InviteGuest{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7928,6 +7562,9 @@ function Invoke-GraphRecon{
         [Parameter(Mandatory=$False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]$Browser,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent,
         [Parameter(Mandatory=$False)]
         [String]$ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
         [switch]
@@ -7935,22 +7572,8 @@ function Invoke-GraphRecon{
         [switch]
         $PermissionEnum
     )
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($Tokens){
         if(!$GraphRun){
             Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -8690,9 +8313,7 @@ function Invoke-SearchUserAttributes {
 
         [Parameter(Position = 0, Mandatory = $True)]
         [string]
-        $SearchTerm = ""
-
-,
+        $SearchTerm = "",
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -8703,25 +8324,14 @@ function Invoke-SearchUserAttributes {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if ($Tokens) {
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -8735,7 +8345,7 @@ function Invoke-SearchUserAttributes {
             $answer = $answer.ToLower()
             if ($answer -eq "yes" -or $answer -eq "y") {
                 Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                 $auth = "Yes"
             } elseif ($answer -eq "no" -or $answer -eq "n") {
                 Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -8871,9 +8481,7 @@ Function Invoke-SearchMailbox{
     [switch]
     $GraphRun,
     [switch]
-    $PageResults
-
-,
+    $PageResults,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -8884,25 +8492,14 @@ Function Invoke-SearchMailbox{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
 
     if($Tokens){
@@ -8920,7 +8517,7 @@ Function Invoke-SearchMailbox{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -9444,9 +9041,7 @@ function Get-SharePointSiteURLs{
         $BatchSize = 200,
         [Parameter(Position = 2, Mandatory = $False)]
         [int]
-        $MaxSites = 0
-
-,
+        $MaxSites = 0,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -9457,25 +9052,14 @@ function Get-SharePointSiteURLs{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -9490,7 +9074,7 @@ function Get-SharePointSiteURLs{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -9659,24 +9243,13 @@ function Invoke-SearchSharePointAndOneDrive{
     [String]$Device = 'Windows',
     [Parameter(Mandatory=$False)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
-    [String]$Browser = 'Edge'
+    [String]$Browser = 'Edge',
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent
     )
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     if($Tokens){
         #Suppressing output if GraphRun module is used
         if (!$GraphRun){
@@ -9924,24 +9497,13 @@ function Invoke-DriveFileDownload{
     [String]$Device,
     [Parameter(Mandatory=$False)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
-    [String]$Browser
+    [String]$Browser,
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent
     )
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     $access_token = $tokens.access_token
     $itemarray = $driveitemids.split(":")
     $downloadUrl = ("https://graph.microsoft.com/v1.0/drives/" + $itemarray[0] + "/items/" + $itemarray[1] + "/content")
@@ -10007,9 +9569,7 @@ function Invoke-SearchTeams{
     [string]
     $OutFile = "",
     [switch]
-    $GraphRun
-
-,
+    $GraphRun,
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -10020,25 +9580,14 @@ function Invoke-SearchTeams{
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     if($Tokens){
         #Suppressing output if GraphRun module is used
@@ -10056,7 +9605,7 @@ function Invoke-SearchTeams{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser -UserAgent $UserAgent
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -10098,7 +9647,7 @@ function Invoke-SearchTeams{
     $uri = "https://substrate.office.com/search/api/v2/query"
     $headers = @{
         "Authorization" = "Bearer $access_token"
-        "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.69"
+        "User-Agent" = $UserAgent
         "Content-Type" = "application/json"
     }
 
@@ -10298,9 +9847,7 @@ function Invoke-CreateCalendarEvent {
         [string]$TimeZone = "UTC",
 
         [Parameter()]
-        [string[]]$Attendees = @()
-
-,
+        [string[]]$Attendees = @(),
         [Parameter(Mandatory = $False)]
         [String]
         $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
@@ -10311,25 +9858,14 @@ function Invoke-CreateCalendarEvent {
         [Parameter(Mandatory = $False)]
         [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
         [String]
-        $Browser = "Edge"
+        $Browser = "Edge",
+        [Parameter(Mandatory = $False)]
+        [String]
+        $UserAgent
     )
 
-    if ($Device) {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent -Device $Device
-        }
-    }
-    else {
-        if ($Browser) {
-            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-        }
-        else {
-            $UserAgent = Invoke-ForgeUserAgent
-        }
-    }
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
 
     try {
         # Set the Microsoft Graph API endpoint for creating events
@@ -10470,6 +10006,9 @@ function Invoke-GraphRunner{
     [Parameter(Mandatory=$False)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
     [String]$Browser = "Edge",
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent,
     [Parameter(Mandatory=$False)]
     [String]$ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
     [Parameter(Mandatory = $false)]
@@ -10757,62 +10296,47 @@ function Invoke-ForgeUserAgent
       <#
     .DESCRIPTION
         Forge the User-Agent when sending requests to the Microsoft API's. Useful for bypassing device specific Conditional Access Policies. Defaults to Windows Edge.
+        A non-empty -UserAgent is returned unchanged so modules can accept a fully custom value.
     #>
     [cmdletbinding()]
     Param(
+        # Not validated here: modules validate -Device/-Browser and may pass empty values.
         [Parameter(Mandatory=$False)]
-        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
         [String]$Device,
         [Parameter(Mandatory=$False)]
-        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
-        [String]$Browser
+        [String]$Browser,
+        [Parameter(Mandatory=$False)]
+        [String]$UserAgent
     )
     Process
     {
+        if ($UserAgent)
+        {
+            return $UserAgent
+        }
+        if (-not $Device)
+        {
+            if ($Browser -eq 'Safari') { $Device = 'Mac' }
+            elseif ($Browser -eq 'Android') { $Device = 'AndroidMobile' }
+            else { $Device = 'Windows' }
+        }
         if ($Device -eq 'Mac')
         {
             if ($Browser -eq 'Chrome')
             {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
             }
             elseif ($Browser -eq 'Firefox')
             {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:70.0) Gecko/20100101 Firefox/70.0'
+                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0'
             }
             elseif ($Browser -eq 'Edge')
             {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/604.1 Edg/91.0.100.0'
-            }
-            elseif ($Browser -eq 'Safari')
-            {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15'
+                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0'
             }
             else
             {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15'
-            }
-        }
-        elseif ($Device -eq 'Windows')
-        {
-            if ($Browser -eq 'IE')
-            {
-                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
-            }
-            elseif ($Browser -eq 'Chrome')
-            {
-                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
-            }
-            elseif ($Browser -eq 'Firefox')
-            {
-                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0'
-            }
-            elseif ($Browser -eq 'Edge')
-            {
-                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19042'
-            }
-            else
-            {
-                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.19042'
+                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15'
             }
         }
         elseif ($Device -eq 'AndroidMobile')
@@ -10863,34 +10387,44 @@ function Invoke-ForgeUserAgent
         }
         else
         {
-            #[ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
-            if ($Browser -eq 'Android')
-            {
-                $UserAgent = 'Mozilla/5.0 (Linux; U; Android 4.0.2; en-us; Galaxy Nexus Build/ICL53F) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'
-            }
-            elseif($Browser -eq 'IE')
+            if ($Browser -eq 'IE')
             {
                 $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko'
             }
-            elseif($Browser -eq 'Chrome')
+            elseif ($Browser -eq 'Chrome')
             {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
             }
-            elseif($Browser -eq 'Firefox')
+            elseif ($Browser -eq 'Firefox')
             {
-                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:70.0) Gecko/20100101 Firefox/70.0'
-            }
-            elseif($Browser -eq 'Safari')
-            {
-                $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Safari/605.1.15'
+                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:143.0) Gecko/20100101 Firefox/143.0'
             }
             else
             {
-                $UserAgent = $UserAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+                $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0'
             }
         }
         return $UserAgent
-   }
+    }
+}
+function Get-UserAgentDefaults
+{
+    <#
+    .DESCRIPTION
+        Returns the caller's $PSDefaultParameterValues plus the forged User-Agent for Invoke-RestMethod and
+        Invoke-WebRequest. A module assigns the result to its own $PSDefaultParameterValues so every request it
+        makes, including those in helper functions it calls, carries the same User-Agent. Existing defaults
+        (for example an operator-set -Proxy) are kept, and nothing leaks outside the module's scope.
+    #>
+    [cmdletbinding()]
+    Param(
+        [Parameter(Mandatory=$True)]
+        [String]$UserAgent
+    )
+    $defaults = $PSDefaultParameterValues.Clone()
+    $defaults['Invoke-RestMethod:UserAgent'] = $UserAgent
+    $defaults['Invoke-WebRequest:UserAgent'] = $UserAgent
+    return $defaults
 }
 
 function Invoke-AuthorizationCodeFlow {
@@ -11020,26 +10554,15 @@ function Invoke-BruteClientIDAccess {
     [Parameter(Mandatory=$False)]
     [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
     [String]$Browser,
+    [Parameter(Mandatory = $False)]
+    [String]
+    $UserAgent,
     [Parameter(Mandatory=$False)]
     [ValidateSet('Yellow','Red','DarkGreen','DarkRed')]
     [String]$OutputColor = "White"
     )
-    if ($Device) {
-		if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
-		}
-		else {
-			$UserAgent = Invoke-ForgeUserAgent -Device $Device
-		}
-	}
-	else {
-	   if ($Browser) {
-			$UserAgent = Invoke-ForgeUserAgent -Browser $Browser
-	   }
-	   else {
-			$UserAgent = Invoke-ForgeUserAgent
-	   }
-	}
+    $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser -UserAgent $UserAgent
+    $PSDefaultParameterValues = Get-UserAgentDefaults -UserAgent $UserAgent
     $AppInfo = @(
         [pscustomobject]@{ClientID='00b41c95-dab0-4487-9791-b9d2c32c80f2'; App='Office 365 Management'}
         [pscustomobject]@{ClientID='04b07795-8ddb-461a-bbee-02f9e1bf7b46'; App='Microsoft Azure CLI'}

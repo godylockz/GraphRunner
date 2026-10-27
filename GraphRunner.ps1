@@ -6334,10 +6334,10 @@ function Get-UpdatableGroups{
         $Browser = "Edge",
         [Parameter(Mandatory = $False)]
         [String]
-        $UserAgent,  # Set the default value to "Edge"
+        $UserAgent,
         [Parameter(Mandatory = $False)]
         [string]
-        $OutputFile = "Updatable_groups.csv",  # Set the default value to "Updatable_groups.csv"
+        $OutputFile = "Updatable_groups.csv",
         [Parameter(Mandatory = $False)]
         [string[]]
         $Keyword,
@@ -6514,8 +6514,10 @@ function Get-UpdatableGroups{
             }
         }
 
-        # Export application assignment details
-        $appsOut = "Group_App_Assignments.csv"
+        # Export application assignment details alongside the main OutputFile
+        $appsDir = [System.IO.Path]::GetDirectoryName($OutputFile)
+        $appsOut = ([System.IO.Path]::GetFileNameWithoutExtension($OutputFile)) + "_app_assignments" + [System.IO.Path]::GetExtension($OutputFile)
+        if ($appsDir) { $appsOut = [System.IO.Path]::Combine($appsDir, $appsOut) }
         $groupAppAssignments | Export-Csv -Path $appsOut -NoTypeInformation
         Write-Host -ForegroundColor Green "[*] Exported group application assignments to $appsOut"
     } catch {

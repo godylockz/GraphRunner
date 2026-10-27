@@ -39,4 +39,36 @@ A good starting place is to import the PowerShell script and run the Get-GraphTo
 Import-Module .\GraphRunner.ps1
 Get-GraphTokens
 ```
-Next, check out the [wiki](https://github.com/dafthack/GraphRunner/wiki) for the full user guide and information about individual modules. 
+Next, check out the [wiki](https://github.com/dafthack/GraphRunner/wiki) for the full user guide and information about individual modules.
+
+### Quick start
+
+List every module and a short description:
+
+```PowerShell
+Import-Module .\GraphRunner.ps1
+List-GraphRunnerModules
+```
+
+Authenticate. Device code is the default; the authorization code flow opens a browser and can spoof the User-Agent on the token request (useful against device-platform Conditional Access policies):
+
+```PowerShell
+Get-GraphTokens                                         # device code
+Get-GraphTokens -AuthorizationCodeFlow -Device Windows -Browser Edge
+```
+
+Already have an access token (for example one you minted elsewhere)? Import it instead of authenticating, then pass `$tokens` to any module:
+
+```PowerShell
+Invoke-ImportTokens -AccessToken "eyJ0..."              # -RefreshToken is optional
+Invoke-SearchUserAttributes -Tokens $tokens -SearchTerm "password"
+```
+
+The token's `aud` must be `https://graph.microsoft.com` and its `scp` must cover what the module calls. Most read modules (recon, user/group enumeration, mail and SharePoint search) work with an access token alone — just import a fresh one when it expires. A handful of modules refresh into other scopes (Teams and SharePoint token swaps, the long-running group enumerators, and the CAPS/Apps legacy fallbacks) and need a refresh token to use every feature.
+
+Spoof the client and User-Agent on any module that reaches out, to blend into sign-in and audit logs. `-Device`/`-Browser` pick a preset; `-UserAgent` overrides with a full custom string:
+
+```PowerShell
+Get-SecurityGroups -Tokens $tokens -Device Windows -Browser Edge
+Get-SecurityGroups -Tokens $tokens -UserAgent "Mozilla/5.0 ..."
+``` 

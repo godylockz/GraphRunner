@@ -552,7 +552,37 @@ function Invoke-InjectOAuthApp{
     [Parameter(Position = 3, Mandatory = $False)]
     [object[]]
     $Tokens
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
   )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -566,7 +596,7 @@ function Invoke-InjectOAuthApp{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -579,6 +609,7 @@ function Invoke-InjectOAuthApp{
     $access_token = $tokens.access_token
     $Headers = @{
         Authorization = "Bearer $access_token"
+        "User-Agent" = $UserAgent
     }
 
     # Get Microsoft Graph Object ID
@@ -952,11 +983,42 @@ function Invoke-DeleteOAuthApp{
         [Parameter(Position = 0, Mandatory = $True)]
         [string]
         $ObjectID = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
     $accessToken = $tokens.access_token
     $deleteUrl = "https://graph.microsoft.com/v1.0/applications/$ObjectID"
     $headers = @{
         Authorization = "Bearer $accessToken"
+        "User-Agent" = $UserAgent
     }
 
 
@@ -1008,7 +1070,37 @@ Function Invoke-GraphOpenInboxFinder{
     [Parameter(Position = 0, Mandatory = $true)]
     [string]
     $userlist = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($tokens){
         $access_token = $tokens.access_token
@@ -1097,7 +1189,37 @@ Function Find-PermissiveCalendars{
     [Parameter(Position = 2, Mandatory = $false)]
     [string]
     $OutFile = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($tokens){
         $access_token = $tokens.access_token
@@ -1628,7 +1750,37 @@ Function Get-Inbox{
     [Parameter(Position = 3, Mandatory = $false)]
     [string]
     $OutFile = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
     if($Tokens){
             Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -1642,7 +1794,7 @@ Function Get-Inbox{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -1770,7 +1922,37 @@ Function Invoke-CreateInboxForwardingRule {
         $GraphRun,
         [switch]
         $PageResults
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     # Requires a graph token scoped with MailboxSettings.ReadWrite, so we need to authenticate with the Microsoft Teams client (1fec8e78-bce4-4aaf-ab1b-5451cc387264)
     # If we have a refresh token, we can leverage FOCI to refresh an access token with the correct scope 
@@ -1814,6 +1996,7 @@ Function Invoke-CreateInboxForwardingRule {
     $headers = @{
         "Authorization" = "Bearer $access_token"
         "Content-Type"  = "application/json"
+        "User-Agent" = $UserAgent
     }
 
     $data = @{
@@ -1882,7 +2065,37 @@ function Get-TeamsApps{
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
         $Tokens
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
         )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -1896,7 +2109,7 @@ function Get-TeamsApps{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -1911,6 +2124,7 @@ function Get-TeamsApps{
     $headers = @{
         Authorization = "Bearer $access_token"
         "Content-Type" = "application/json"
+        "User-Agent" = $UserAgent
     }
 
     $teamsResponse = Invoke-RestMethod -Method Get -Uri "https://graph.microsoft.com/v1.0/me/joinedTeams" -Headers $headers
@@ -1969,7 +2183,37 @@ function Get-TeamsChannels{
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
         $Tokens
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
         )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -1983,7 +2227,7 @@ function Get-TeamsChannels{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2064,7 +2308,37 @@ function Get-ChannelUsersEnum{
         [Parameter(Position = 2, Mandatory = $False)]
         [string]
         $Teams = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
         )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2078,7 +2352,7 @@ function Get-ChannelUsersEnum{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2196,7 +2470,37 @@ function Get-ChannelEmail{
         [Parameter(Position = 2, Mandatory = $False)]
         [string]
         $Teams = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
         )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2210,7 +2514,7 @@ function Get-ChannelEmail{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2414,7 +2718,37 @@ function Find-ChannelEmails{
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
         $Tokens
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
         )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2428,7 +2762,7 @@ function Find-ChannelEmails{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2503,7 +2837,37 @@ function Get-Webhooks{
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
         $Tokens
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
         )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
         if(!$Tokens){
             if ($global:tokens){
                 $tokens = $global:tokens
@@ -2517,7 +2881,7 @@ function Get-Webhooks{
                     $answer = $answer.ToLower()
                     if ($answer -eq "yes" -or $answer -eq "y") {
                         Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                        $tokens = Get-GraphTokens -ExternalCall
+                        $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                         $auth = "Yes"
                     } elseif ($answer -eq "no" -or $answer -eq "n") {
                         Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -2769,7 +3133,37 @@ function Create-Webhook{
             [Parameter(Position = 4, Mandatory = $True)]
             [ValidateSet("IncomingWebhook","Jira","Jenkins","AzureDevOps")]
             [String]$ConnectorType
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
             )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
             if(!$Tokens){
                 if ($global:tokens){
                     $tokens = $global:tokens
@@ -2783,7 +3177,7 @@ function Create-Webhook{
                         $answer = $answer.ToLower()
                         if ($answer -eq "yes" -or $answer -eq "y") {
                             Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                            $tokens = Get-GraphTokens -ExternalCall
+                            $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                             $auth = "Yes"
                         } elseif ($answer -eq "no" -or $answer -eq "n") {
                             Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -3211,7 +3605,37 @@ function Get-TeamsChat{
     [Parameter(Position = 0, Mandatory = $false)]
     [object[]]
     $Tokens = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
     if($Tokens){
             Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -3229,6 +3653,7 @@ function Get-TeamsChat{
     $headers = @{
     "Authorization" = "Bearer $access_token"
     "Content-Type" = "application/json"
+    "User-Agent" = $UserAgent
     }
 
 
@@ -5215,7 +5640,37 @@ Function Invoke-DumpApps{
         [string]$OutFile = "",
         [Parameter(Mandatory = $False)]
         [switch]$SkipMicrosoftOwnedSPs
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         if(!$GraphRun){
@@ -5232,7 +5687,7 @@ Function Invoke-DumpApps{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -5248,6 +5703,7 @@ Function Invoke-DumpApps{
         "Authorization" = "Bearer $accessToken"
         "Content-Type" = "application/json"
         "Accept" = "application/json"
+        "User-Agent" = $UserAgent
     }
 
     $warnings = @()
@@ -5475,6 +5931,23 @@ function Get-SecurityGroups{
         $RefreshInterval = (60 * 10) # 10 minutes
     )
 
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
+
     if ($SecurityOnly -and $M365Only) {
         Write-Host -ForegroundColor Red "[*] Please use either -SecurityOnly or -M365Only, not both at the same time."
         return
@@ -5494,7 +5967,7 @@ function Get-SecurityGroups{
             $answer = $answer.ToLower()
             if ($answer -eq "yes" -or $answer -eq "y") {
                 Write-Host -ForegroundColor Yellow "[*] Running Get-GraphTokens now..."
-                $tokens = Get-GraphTokens -ExternalCall
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                 $auth = "Yes"
             } elseif ($answer -eq "no" -or $answer -eq "n") {
                 Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -5509,6 +5982,7 @@ function Get-SecurityGroups{
     [string]$refreshToken = $tokens.refresh_token
     $headers = @{
         Authorization = "Bearer $accessToken"
+        "User-Agent" = $UserAgent
     }
 
     if ($SecurityOnly) {
@@ -5639,7 +6113,37 @@ function Get-DirectoryRoles{
         [string] $OutputFile = "directory_roles.csv",
         [Parameter(Mandatory = $False)]
         [switch] $GraphRun
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if ($Tokens) {
         if (!$GraphRun) {
@@ -5654,7 +6158,7 @@ function Get-DirectoryRoles{
             $answer = $answer.ToLower()
             if ($answer -eq "yes" -or $answer -eq "y") {
                 Write-Host -ForegroundColor Yellow "[*] Running Get-GraphTokens now..."
-                $tokens = Get-GraphTokens -ExternalCall
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                 $auth = "Yes"
             } elseif ($answer -eq "no" -or $answer -eq "n") {
                 Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -5668,6 +6172,7 @@ function Get-DirectoryRoles{
     $accessToken = $tokens.access_token
     $headers = @{
         Authorization = "Bearer $accessToken"
+        "User-Agent" = $UserAgent
     }
 
     if (!$GraphRun) {
@@ -5842,7 +6347,37 @@ function Invoke-DeleteGroup {
         $groupId,
         [object[]]
         $Tokens = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -5857,7 +6392,7 @@ function Invoke-DeleteGroup {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -5876,6 +6411,7 @@ function Invoke-DeleteGroup {
     $headers = @{
         "Authorization" = "Bearer $accessToken"
         "Content-Type" = "application/json"
+        "User-Agent" = $UserAgent
     }
 
     try {
@@ -5910,7 +6446,37 @@ function Invoke-SecurityGroupCloner{
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
         $Tokens = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -5925,7 +6491,7 @@ function Invoke-SecurityGroupCloner{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -5940,6 +6506,7 @@ function Invoke-SecurityGroupCloner{
 
     $headers = @{
         Authorization = "Bearer $accessToken"
+        "User-Agent" = $UserAgent
     }
 
     $secgroups = Get-SecurityGroups -Tokens $tokens
@@ -6229,7 +6796,37 @@ function Get-DynamicGroups{
         [Parameter(Position = 0, Mandatory = $False)]
         [object[]]
         $Tokens = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6244,7 +6841,7 @@ function Get-DynamicGroups{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6264,6 +6861,7 @@ function Get-DynamicGroups{
     $headers = @{
         "Authorization" = "Bearer $accessToken"
         "Content-Type" = "application/json"
+        "User-Agent" = $UserAgent
     }
 
     $results = @()
@@ -6371,7 +6969,37 @@ function Invoke-AddGroupMember {
         $userId,
         [object[]]
         $Tokens = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6386,7 +7014,7 @@ function Invoke-AddGroupMember {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6458,7 +7086,37 @@ function Invoke-RemoveGroupMember {
         $userId,
         [object[]]
         $Tokens = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6473,7 +7131,7 @@ function Invoke-RemoveGroupMember {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6552,7 +7210,37 @@ function Get-EntraIDGroupInfo {
         [string]$GroupList,    # File path to a text file with group names and guids exported from Get-UpdatableGroups
         [string]$GroupName,     # Specific group name to lookup
         [string]$GroupGUID      # Specific group guid to lookup
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -6567,7 +7255,7 @@ function Get-EntraIDGroupInfo {
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6582,6 +7270,7 @@ function Get-EntraIDGroupInfo {
 
     $headers = @{
         'Authorization' = "Bearer $accesstoken"
+        "User-Agent" = $UserAgent
     }
 
     if ($GroupName){
@@ -6753,7 +7442,37 @@ function Invoke-InviteGuest{
     [object[]]
     $Tokens = ""
 
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
     }
@@ -6767,7 +7486,7 @@ function Invoke-InviteGuest{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -6779,7 +7498,7 @@ function Invoke-InviteGuest{
     }
     $accesstoken = $tokens.access_token
     [string]$refreshToken = $tokens.refresh_token
-    $headers = @{"Authorization" = "Bearer $accesstoken"}
+    $headers = @{"Authorization" = "Bearer $accesstoken"; "User-Agent" = $UserAgent}
     # Construct the Graph API endpoint
     $graphApiUrl = "https://graph.microsoft.com/v1.0"
     $orginfo = Invoke-RestMethod -Uri "$graphApiUrl/organization" -Headers $headers
@@ -7799,7 +8518,37 @@ function Invoke-SearchUserAttributes {
         [Parameter(Position = 0, Mandatory = $True)]
         [string]
         $SearchTerm = ""
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if ($Tokens) {
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -7813,7 +8562,7 @@ function Invoke-SearchUserAttributes {
             $answer = $answer.ToLower()
             if ($answer -eq "yes" -or $answer -eq "y") {
                 Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                $tokens = Get-GraphTokens -ExternalCall
+                $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                 $auth = "Yes"
             } elseif ($answer -eq "no" -or $answer -eq "n") {
                 Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7828,6 +8577,7 @@ function Invoke-SearchUserAttributes {
 
     $headers = @{
         Authorization = "Bearer $accessToken"
+        "User-Agent" = $UserAgent
     }
 
     $usersEndpoint = "https://graph.microsoft.com/v1.0/users"
@@ -7949,7 +8699,37 @@ Function Invoke-SearchMailbox{
     $GraphRun,
     [switch]
     $PageResults
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
 
     if($Tokens){
@@ -7967,7 +8747,7 @@ Function Invoke-SearchMailbox{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -7986,6 +8766,7 @@ Function Invoke-SearchMailbox{
     $headers = @{
     "Authorization" = "Bearer $access_token"
     "Content-Type" = "application/json"
+    "User-Agent" = $UserAgent
     }
 
     function Get-MailboxSearchHeaderValue {
@@ -8491,7 +9272,37 @@ function Get-SharePointSiteURLs{
         [Parameter(Position = 2, Mandatory = $False)]
         [int]
         $MaxSites = 0
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         Write-Host -ForegroundColor yellow "[*] Using the provided access tokens."
@@ -8506,7 +9317,7 @@ function Get-SharePointSiteURLs{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -8535,6 +9346,7 @@ function Get-SharePointSiteURLs{
 
     $headers = @{
         "Authorization" = "Bearer $accessToken"
+        "User-Agent" = $UserAgent
     }
 
     Write-Host -ForegroundColor yellow "[*] Now getting SharePoint site URLs..."
@@ -9023,7 +9835,37 @@ function Invoke-SearchTeams{
     $OutFile = "",
     [switch]
     $GraphRun
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     if($Tokens){
         #Suppressing output if GraphRun module is used
@@ -9041,7 +9883,7 @@ function Invoke-SearchTeams{
                 $answer = $answer.ToLower()
                 if ($answer -eq "yes" -or $answer -eq "y") {
                     Write-Host -ForegroundColor yellow "[*] Running Get-GraphTokens now..."
-                    $tokens = Get-GraphTokens -ExternalCall
+                    $tokens = Get-GraphTokens -ExternalCall -ClientID $ClientID -Device $Device -Browser $Browser
                     $auth = "Yes"
                 } elseif ($answer -eq "no" -or $answer -eq "n") {
                     Write-Host -ForegroundColor Yellow "[*] Quitting..."
@@ -9284,7 +10126,37 @@ function Invoke-CreateCalendarEvent {
 
         [Parameter()]
         [string[]]$Attendees = @()
+
+,
+        [Parameter(Mandatory = $False)]
+        [String]
+        $ClientID = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Mac','Windows','AndroidMobile','iPhone')]
+        [String]
+        $Device = "Windows",
+        [Parameter(Mandatory = $False)]
+        [ValidateSet('Android','IE','Chrome','Firefox','Edge','Safari')]
+        [String]
+        $Browser = "Edge"
     )
+
+    if ($Device) {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent -Device $Device
+        }
+    }
+    else {
+        if ($Browser) {
+            $UserAgent = Invoke-ForgeUserAgent -Browser $Browser
+        }
+        else {
+            $UserAgent = Invoke-ForgeUserAgent
+        }
+    }
 
     try {
         # Set the Microsoft Graph API endpoint for creating events
@@ -9294,6 +10166,7 @@ function Invoke-CreateCalendarEvent {
         $headers = @{
             "Authorization" = "Bearer $($Tokens.access_token)"
             "Content-Type"  = "application/json"
+            "User-Agent" = $UserAgent
         }
 
         # Create the event data in a structured format

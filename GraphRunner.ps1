@@ -8738,7 +8738,12 @@ Function Invoke-SearchMailbox{
         }
 
         $searchQueryJson = $searchQuery | ConvertTo-Json -Depth 10
-        $response = Invoke-RestMethod -Uri $graphApiUrl -Headers $headers -Method Post -Body $searchQueryJson
+        try {
+            $response = Invoke-RestMethod -Uri $graphApiUrl -Headers $headers -Method Post -Body $searchQueryJson
+        } catch {
+            Set-SearchAccessDenied -ErrorRecord $_ -ScopeHint "Mail.Read"
+            return
+        }
         $hitsContainer = $response.value[0].hitsContainers[0]
         $hits = @($hitsContainer.hits)
 
@@ -9151,7 +9156,12 @@ function Get-SharePointSiteURLs{
             )
         }
 
-        $response = Invoke-RestMethod -Uri $searchUrl -Headers $headers -Method Post -ContentType "application/json" -Body ($requestBody | ConvertTo-Json -Depth 10)
+        try {
+            $response = Invoke-RestMethod -Uri $searchUrl -Headers $headers -Method Post -ContentType "application/json" -Body ($requestBody | ConvertTo-Json -Depth 10)
+        } catch {
+            Set-SearchAccessDenied -ErrorRecord $_ -ScopeHint "Sites.Read.All / Files.Read.All"
+            break
+        }
         $hitsContainer = $response.value[0].hitsContainers[0]
 
         if ($null -eq $hitsContainer) {
@@ -9330,9 +9340,13 @@ function Invoke-SearchSharePointAndOneDrive{
     # Convert the search query to JSON format
     $searchQueryJson = $searchQuery | ConvertTo-Json -Depth 10
 
-    # Perform the HTTP POST request to search emails
-    $response = Invoke-RestMethod -Uri $graphApiUrl -Headers $headers -Method Post -Body $searchQueryJson
-
+    # Perform the HTTP POST request to search SharePoint and OneDrive
+    try {
+        $response = Invoke-RestMethod -Uri $graphApiUrl -Headers $headers -Method Post -Body $searchQueryJson
+    } catch {
+        Set-SearchAccessDenied -ErrorRecord $_ -ScopeHint "Files.Read.All / Sites.Read.All"
+        return
+    }
 
     $resultarray = @()
     $total = $response.value[0].hitsContainers[0].total
@@ -9747,7 +9761,12 @@ function Invoke-SearchTeams{
     $bodyJson = $body | ConvertTo-Json -Depth 10
 
     # Send the POST request
-    $searchresponse = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $bodyJson
+    try {
+        $searchresponse = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $bodyJson
+    } catch {
+        Set-SearchAccessDenied -ErrorRecord $_ -ScopeHint "Teams message search scope"
+        return
+    }
 
 
     $headers = @{
@@ -10517,8 +10536,10 @@ function Invoke-GraphRunner{
         $mailout = "$folderName\interesting-mail.csv"
 
         Write-Host -ForegroundColor yellow "[*] Now searching Email using detector file $DetectorFile. Results will be written to $folderName."
+        $script:GraphRunnerSearchDenied = $false
         foreach($detect in $detector.Detectors){
             Invoke-SearchMailbox -Tokens $tokens -SearchTerm $detect.SearchQuery -DetectorName $detect.DetectorName -MessageCount 500 -OutFile $mailout -GraphRun -PageResults
+            if ($script:GraphRunnerSearchDenied) { break }
         }
     }
     # Calculate the minimum sleep time
@@ -10548,8 +10569,10 @@ function Invoke-GraphRunner{
         $spout = "$folderName\interesting-files.csv"
 
         Write-Host -ForegroundColor yellow "[*] Now searching SharePoint and OneDrive using detector file $DetectorFile. Results will be written to $folderName."
+        $script:GraphRunnerSearchDenied = $false
         foreach($detect in $detector.Detectors){
             Invoke-SearchSharePointAndOneDrive  -Tokens $tokens -SearchTerm $detect.SearchQuery -DetectorName $detect.DetectorName -PageResults -ResultCount 500 -ReportOnly -OutFile $spout -GraphRun
+            if ($script:GraphRunnerSearchDenied) { break }
         }
     }
     # Calculate the minimum sleep time
@@ -10578,8 +10601,10 @@ function Invoke-GraphRunner{
     if(!$DisableTeams){
         $teamsout = "$folderName\interesting-teamsmessages.csv"
         Write-Host -ForegroundColor yellow "[*] Now searching Teams using detector file $DetectorFile. Results will be written to $folderName."
+        $script:GraphRunnerSearchDenied = $false
         foreach($detect in $detector.Detectors){
             Invoke-SearchTeams  -Tokens $tokens -SearchTerm $detect.SearchQuery -DetectorName $detect.DetectorName -ResultSize 500 -OutFile $teamsout -GraphRun
+            if ($script:GraphRunnerSearchDenied) { break }
         }
     }
 
@@ -10770,6 +10795,30 @@ function Get-OAuthErrorMessage
         }
     } catch {}
     return $raw
+}
+function Set-SearchAccessDenied
+{
+    <#
+    .DESCRIPTION
+        Report a failed Microsoft Search request cleanly instead of letting the caller crash on an empty
+        result. On a 403 it names the scope the token is missing and sets $script:GraphRunnerSearchDenied so
+        Invoke-GraphRunner can stop looping the remaining detectors for that search type.
+    #>
+    [cmdletbinding()]
+    Param(
+        [Parameter(Mandatory=$True)]
+        $ErrorRecord,
+        [Parameter(Mandatory=$True)]
+        [String]$ScopeHint
+    )
+    $code = $null
+    if ($ErrorRecord.Exception.Response) { $code = $ErrorRecord.Exception.Response.StatusCode.value__ }
+    if ($code -eq 403) {
+        $script:GraphRunnerSearchDenied = $true
+        Write-Host -ForegroundColor Red "[-] Access denied (403): the token is missing the scope this search needs ($ScopeHint). Skipping."
+    } else {
+        Write-Host -ForegroundColor Red "[-] Search request failed: $(Get-OAuthErrorMessage -ErrorRecord $ErrorRecord)"
+    }
 }
 
 function Invoke-AuthorizationCodeFlow {
